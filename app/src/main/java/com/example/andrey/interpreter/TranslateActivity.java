@@ -1,18 +1,15 @@
 package com.example.andrey.interpreter;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -20,7 +17,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 public class TranslateActivity extends AppCompatActivity {
     private final static String KEY_NATIVE_LANG = "Native lang";
-    private final static String KEY_FORIEGN_LANG = "Foreign lang";
+    private final static String KEY_FOREIGN_LANG = "Foreign lang";
     private final static String KEY_TEXT = "Text in EditText";
 
     private TextView mNativeLang;
@@ -39,10 +35,10 @@ public class TranslateActivity extends AppCompatActivity {
     private Button mButtonTranslate;
     private RecyclerView mDictionaryRecyclerView;
     private DictionaryAdapter mAdapter;
+    private Button mWordsList;
 
     private Map<String, String> mTranslatorMap;
-    private List<String> mSortetLangs;
-    private List<Dictionary> mDictionaries;
+    private List<String> mSortedLands;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +54,7 @@ public class TranslateActivity extends AppCompatActivity {
         mTranslatedText.setMovementMethod(new ScrollingMovementMethod());
         mInputText = (EditText) findViewById(R.id.translate_field);
         mButtonTranslate = (Button) findViewById(R.id.button_translate);
+        mWordsList = (Button) findViewById(R.id.words_list);
 
         mDictionaryRecyclerView = (RecyclerView) findViewById(R.id.translator_recycler_view);
         mDictionaryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -92,9 +89,17 @@ public class TranslateActivity extends AppCompatActivity {
             }
         });
 
+        mWordsList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(TranslateActivity.this, WordsListActivity.class);
+                startActivity(intent);
+            }
+        });
+
         if (savedInstanceState != null) {
             mNativeLang.setText(savedInstanceState.getString(KEY_NATIVE_LANG));
-            mForeignLang.setText(savedInstanceState.getString(KEY_FORIEGN_LANG));
+            mForeignLang.setText(savedInstanceState.getString(KEY_FOREIGN_LANG));
             mInputText.setText(savedInstanceState.getString(KEY_TEXT));
             doRequest();
         }
@@ -105,7 +110,7 @@ public class TranslateActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(KEY_NATIVE_LANG, mNativeLang.getText().toString());
-        outState.putString(KEY_FORIEGN_LANG, mForeignLang.getText().toString());
+        outState.putString(KEY_FOREIGN_LANG, mForeignLang.getText().toString());
         outState.putString(KEY_TEXT, mInputText.getText().toString());
     }
 
@@ -140,7 +145,7 @@ public class TranslateActivity extends AppCompatActivity {
         popupMenu.inflate(R.menu.popup_menu);
 
         for (String lang :
-                mSortetLangs) {
+                mSortedLands) {
             popupMenu.getMenu().add(lang);
         }
 
@@ -169,13 +174,13 @@ public class TranslateActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        mSortetLangs = new ArrayList<>();
+        mSortedLands = new ArrayList<>();
         for (Map.Entry entries :
                 mTranslatorMap.entrySet()) {
-            mSortetLangs.add((String)entries.getKey());
+            mSortedLands.add((String)entries.getKey());
         }
 
-        Collections.sort(mSortetLangs);
+        Collections.sort(mSortedLands);
     }
 
     // Поменять языки местами
