@@ -3,20 +3,33 @@ package com.example.andrey.interpreter;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TabHost;
+import android.widget.TextView;
+
+import java.util.List;
 
 public class WordsListActivity extends AppCompatActivity {
 
-    private Button mTransltorActivity;
+    private Button mTranslatorActivity;
+    private RecyclerView mRecyclerViewHistory;
+    private RecyclerView mRecyclerViewFavorite;
+    private HistoryAdapter mAdapterHistory;
+    private Adapter mAdapterFavorite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_words_list);
 
-        mTransltorActivity = (Button) findViewById(R.id.translate_activity);
+        mTranslatorActivity = (Button) findViewById(R.id.translate_activity);
 
         TabHost tabHost = (TabHost) findViewById(R.id.tabHost);
         tabHost.setup();
@@ -25,21 +38,86 @@ public class WordsListActivity extends AppCompatActivity {
 
         tabSpec = tabHost.newTabSpec("History");
         tabSpec.setIndicator("История");
-        tabSpec.setContent(R.id.recylerTab1);
+        tabSpec.setContent(R.id.recyclerTab1);
         tabHost.addTab(tabSpec);
 
         tabSpec = tabHost.newTabSpec("Favorite");
         tabSpec.setIndicator("Избранное");
-        tabSpec.setContent(R.id.recylerTab2);
+        tabSpec.setContent(R.id.recyclerTab2);
         tabHost.addTab(tabSpec);
 
         tabHost.setCurrentTabByTag("History");
 
-        mTransltorActivity.setOnClickListener(new View.OnClickListener() {
+        mRecyclerViewHistory = (RecyclerView) findViewById(R.id.recyclerTab1);
+        mRecyclerViewHistory.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+
+        updateUI();
+
+        mTranslatorActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
+    }
+
+    private void updateUI() {
+        WordsListQuery query = new WordsListQuery(getApplicationContext());
+        List<ListItem> items = query.getWords("");
+        mAdapterHistory = new HistoryAdapter(items);
+        mRecyclerViewHistory.setAdapter(mAdapterHistory);
+    }
+
+    private class HistoryHolder extends RecyclerView.ViewHolder {
+        private ListItem mItem;
+
+        private TextView mTextNative;
+        private TextView mTextForeign;
+        private CheckBox mCheckBoxFavorite;
+        private TextView mLangs;
+
+        public HistoryHolder(View itemView) {
+            super(itemView);
+            mTextNative = (TextView) itemView.findViewById(R.id.native_text_in_words_list);
+            mTextForeign = (TextView) itemView.findViewById(R.id.foreign_text_in_words_list);
+            mCheckBoxFavorite = (CheckBox) itemView.findViewById(R.id.checkBox_in_words_list);
+            mLangs = (TextView) itemView.findViewById(R.id.langs_in_words_list);
+        }
+
+        public void bindHistory(ListItem item) {
+            mItem = item;
+            mTextNative.setText(mItem.getNativeText());
+            mTextForeign.setText(mItem.getForeignText());
+            mCheckBoxFavorite.setChecked(mItem.isFavorite());
+            mLangs.setText(mItem.getLangs());
+        }
+    }
+
+    private class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
+
+        private List<ListItem> mListHistory;
+
+        public HistoryAdapter(List<ListItem> items) {
+            mListHistory = items;
+        }
+
+        @Override
+        public HistoryHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
+            View view = layoutInflater
+                    .inflate(R.layout.words_list_item, parent, false);
+            return new HistoryHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(HistoryHolder holder, int position) {
+            ListItem item = mListHistory.get(position);
+            holder.bindHistory(item);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mListHistory.size();
+        }
     }
 }

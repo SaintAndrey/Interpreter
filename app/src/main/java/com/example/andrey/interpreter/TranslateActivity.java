@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -36,9 +37,12 @@ public class TranslateActivity extends AppCompatActivity {
     private RecyclerView mDictionaryRecyclerView;
     private DictionaryAdapter mAdapter;
     private Button mWordsList;
+    private CheckBox mFavoriteCheckBox;
 
     private Map<String, String> mTranslatorMap;
     private List<String> mSortedLands;
+    private ListItem mWordItem = new ListItem();
+    private String JSON;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +59,7 @@ public class TranslateActivity extends AppCompatActivity {
         mInputText = (EditText) findViewById(R.id.translate_field);
         mButtonTranslate = (Button) findViewById(R.id.button_translate);
         mWordsList = (Button) findViewById(R.id.words_list);
+        mFavoriteCheckBox = (CheckBox) findViewById(R.id.checkBox);
 
         mDictionaryRecyclerView = (RecyclerView) findViewById(R.id.translator_recycler_view);
         mDictionaryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -92,6 +97,9 @@ public class TranslateActivity extends AppCompatActivity {
         mWordsList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                createWordItem();
+                WordsListQuery query = new WordsListQuery(getApplicationContext());
+                query.addItemWord(mWordItem);
                 Intent intent = new Intent(TranslateActivity.this, WordsListActivity.class);
                 startActivity(intent);
             }
@@ -114,6 +122,16 @@ public class TranslateActivity extends AppCompatActivity {
         outState.putString(KEY_TEXT, mInputText.getText().toString());
     }
 
+    private void createWordItem() {
+        mWordItem.setNativeText(mInputText.getText().toString());
+        mWordItem.setForeignText(mTranslatedText.getText().toString());
+        mWordItem.setHistory(true);
+        mWordItem.setLangs(mTranslatorMap.get(mNativeLang.getText().toString())
+                + "-"
+                + mTranslatorMap.get(mForeignLang.getText().toString()));
+        mWordItem.setFavorite(mFavoriteCheckBox.isChecked());
+        mWordItem.setJSONFile(JSON);
+    }
 
     // Отправка запроса на получения перевода и синонимов
     private void doRequest() {
@@ -129,8 +147,9 @@ public class TranslateActivity extends AppCompatActivity {
                 rd.execute(langs, mInputText.getText().toString());
 
                 mTranslatedText.setText(rt.get());
-
                 updateList(rd.get());
+
+                JSON = rd.getJSON();
             } catch (InterruptedException e) {
             } catch (ExecutionException e) {
             }

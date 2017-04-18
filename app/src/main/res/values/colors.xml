@@ -2,6 +2,7 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#000000</color>
+    <color name="underTab">#000000</color>
     <color name="colorAccent">#f2cc3d</color>
     <color name="colorNum">#9A9A9A</color>
     <color name="colorTranslatedText">#4b4b99</color>

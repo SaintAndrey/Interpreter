@@ -22,6 +22,7 @@ public class RequestDictionary extends AsyncTask<String, Void, List<Dictionary>>
             "https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key=";
     private final static String KEY =
             "dict.1.1.20170327T063331Z.90b7d084561f15d4.0d76809120837baf0fdc1fbcd1be41bb49c126e0";
+    private String JSON;
 
     @Override
     protected List<Dictionary> doInBackground(String... params) {
@@ -41,7 +42,8 @@ public class RequestDictionary extends AsyncTask<String, Void, List<Dictionary>>
         }
 
         // Получение JSON файла
-        String JSON = Connect.getFile(requestURL);
+        JSON = Connect.getFile(requestURL);
+        Log.d("json", JSON);
 
         // Парсинг файла и заполнение результата в тип List<Dictionary>
         Parser<List<Dictionary>> parser = new Parser<List<Dictionary>>() {
@@ -110,5 +112,9 @@ public class RequestDictionary extends AsyncTask<String, Void, List<Dictionary>>
             };
 
         return parser.doParse(JSON);
+    }
+
+    public String getJSON() {
+        return JSON;
     }
 }

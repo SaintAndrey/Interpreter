@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+    <CheckBox
+        android:id="@+id/checkBox_in_words_list"
+        android:button="@drawable/checkbox_selector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/langs_in_words_list"
+        android:textColor="@color/colorNum"
+        android:layout_marginTop="8dp"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:id="@+id/item_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/checkBox_in_words_list"
+        android:layout_toLeftOf="@id/langs_in_words_list"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/native_text_in_words_list"
+            android:textColor="@color/colorPrimaryDark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/foreign_text_in_words_list"
+            android:textColor="@color/colorNum"
+            android:layout_below="@id/item_translate_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

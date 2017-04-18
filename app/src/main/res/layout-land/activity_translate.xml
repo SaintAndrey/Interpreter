@@ -17,7 +17,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@color/colorSwapLangs"
         android:layout_marginBottom="6dp">
 
         <RelativeLayout
@@ -91,23 +90,34 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="5dp"
             android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/translated_word"
-                android:scrollbars="vertical"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/button_translate"
-                android:layout_marginTop="10dp"
-                android:layout_marginLeft="7dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_height="match_parent">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/translator_recycler_view"
-                android:layout_below="@id/translated_word"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@id/buttons_layout"/>
+                <TextView
+                    android:id="@+id/translated_word"
+                    android:scrollbars="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginBottom="10dp"/>
+
+                <CheckBox
+                    android:id="@+id/checkBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:button="@drawable/checkbox_selector"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/translator_recycler_view"
+                    android:layout_below="@id/translated_word"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+
+            </RelativeLayout>
         </LinearLayout>
 
     </LinearLayout>
