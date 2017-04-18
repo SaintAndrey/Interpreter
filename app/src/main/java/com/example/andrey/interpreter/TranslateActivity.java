@@ -69,7 +69,16 @@ public class TranslateActivity extends AppCompatActivity {
         mButtonTranslate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doRequest();
+                WordsListQuery query = new WordsListQuery(getApplicationContext());
+                ListItem item = query.getWord(mInputText.getText().toString(), doStringLangs());
+                if (item == null) {
+                    doRequest();
+                } else {
+                    Log.d("debug", "query: " + item.getNativeText());
+                    mTranslatedText.setText(item.getForeignText());
+                    mFavoriteCheckBox.setChecked(item.isFavorite());
+                    updateList(new ParserDictionary().doParse(item.getJSONFile()));
+                }
             }
         });
 
@@ -137,14 +146,11 @@ public class TranslateActivity extends AppCompatActivity {
     private void doRequest() {
         if (!mInputText.getText().toString().isEmpty()) {
             try {
-                String langs = mTranslatorMap.get(mNativeLang.getText().toString())
-                        + "-"
-                        + mTranslatorMap.get(mForeignLang.getText().toString());
 
                 RequestTranslator rt = new RequestTranslator();
                 RequestDictionary rd = new RequestDictionary();
-                rt.execute(langs, mInputText.getText().toString());
-                rd.execute(langs, mInputText.getText().toString());
+                rt.execute(doStringLangs(), mInputText.getText().toString());
+                rd.execute(doStringLangs(), mInputText.getText().toString());
 
                 mTranslatedText.setText(rt.get());
                 updateList(rd.get());
@@ -156,6 +162,12 @@ public class TranslateActivity extends AppCompatActivity {
         } else {
             mTranslatedText.setText("");
         }
+    }
+
+    private String doStringLangs() {
+        return mTranslatorMap.get(mNativeLang.getText().toString())
+                + "-"
+                + mTranslatorMap.get(mForeignLang.getText().toString());
     }
 
     // Отобразить PopupMenu с выбором поддерживаемых языков

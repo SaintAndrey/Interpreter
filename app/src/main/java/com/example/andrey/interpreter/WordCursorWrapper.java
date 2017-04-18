@@ -19,16 +19,16 @@ public class WordCursorWrapper extends CursorWrapper {
         String native_text = getString(getColumnIndex(TranslatorTable.Cols.NATIVE));
         String foreign_text = getString(getColumnIndex(TranslatorTable.Cols.FOREIGN));
         String langs_text = getString(getColumnIndex(TranslatorTable.Cols.LANGS));
-        int history = getInt(getColumnIndex(TranslatorTable.Cols.HISTORY));
-        int favorite = getInt(getColumnIndex(TranslatorTable.Cols.FAVORITE));
+        String history = getString(getColumnIndex(TranslatorTable.Cols.HISTORY));
+        String favorite = getString(getColumnIndex(TranslatorTable.Cols.FAVORITE));
         String json = getString(getColumnIndex(TranslatorTable.Cols.JSON_FILE));
 
         ListItem word = new ListItem();
         word.setNativeText(native_text);
         word.setForeignText(foreign_text);
         word.setLangs(langs_text);
-        word.setHistory(history != 0);
-        word.setFavorite(favorite != 0);
+        word.setHistory(history.equals("Yes") ? true : false);
+        word.setFavorite(favorite.equals("Yes") ? true : false);
         word.setJSONFile(json);
 
         return word;

@@ -22,7 +22,7 @@ public class WordsListActivity extends AppCompatActivity {
     private RecyclerView mRecyclerViewHistory;
     private RecyclerView mRecyclerViewFavorite;
     private HistoryAdapter mAdapterHistory;
-    private Adapter mAdapterFavorite;
+    private FavoriteAdapter mAdapterFavorite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +51,9 @@ public class WordsListActivity extends AppCompatActivity {
         mRecyclerViewHistory = (RecyclerView) findViewById(R.id.recyclerTab1);
         mRecyclerViewHistory.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
+        mRecyclerViewFavorite = (RecyclerView) findViewById(R.id.recyclerTab2);
+        mRecyclerViewFavorite.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+
         updateUI();
 
         mTranslatorActivity.setOnClickListener(new View.OnClickListener() {
@@ -63,9 +66,15 @@ public class WordsListActivity extends AppCompatActivity {
 
     private void updateUI() {
         WordsListQuery query = new WordsListQuery(getApplicationContext());
-        List<ListItem> items = query.getWords("");
+        List<ListItem> items = query
+                .getWords(TranslatorDbSchema.TranslatorTable.Cols.HISTORY + " = ?");
         mAdapterHistory = new HistoryAdapter(items);
         mRecyclerViewHistory.setAdapter(mAdapterHistory);
+
+        items = query
+                .getWords(TranslatorDbSchema.TranslatorTable.Cols.FAVORITE + " = ?");
+        mAdapterFavorite = new FavoriteAdapter(items);
+        mRecyclerViewFavorite.setAdapter(mAdapterFavorite);
     }
 
     private class HistoryHolder extends RecyclerView.ViewHolder {
@@ -118,6 +127,60 @@ public class WordsListActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return mListHistory.size();
+        }
+    }
+
+
+    private class FavoriteHolder extends RecyclerView.ViewHolder {
+        private ListItem mItem;
+
+        private TextView mTextNative;
+        private TextView mTextForeign;
+        private CheckBox mCheckBoxFavorite;
+        private TextView mLangs;
+
+        public FavoriteHolder(View itemView) {
+            super(itemView);
+            mTextNative = (TextView) itemView.findViewById(R.id.native_text_in_words_list);
+            mTextForeign = (TextView) itemView.findViewById(R.id.foreign_text_in_words_list);
+            mCheckBoxFavorite = (CheckBox) itemView.findViewById(R.id.checkBox_in_words_list);
+            mLangs = (TextView) itemView.findViewById(R.id.langs_in_words_list);
+        }
+
+        public void bindHistory(ListItem item) {
+            mItem = item;
+            mTextNative.setText(mItem.getNativeText());
+            mTextForeign.setText(mItem.getForeignText());
+            mCheckBoxFavorite.setChecked(mItem.isFavorite());
+            mLangs.setText(mItem.getLangs());
+        }
+    }
+
+    private class FavoriteAdapter extends RecyclerView.Adapter<FavoriteHolder> {
+
+        private List<ListItem> mListFavorite;
+
+        public FavoriteAdapter(List<ListItem> items) {
+            mListFavorite = items;
+        }
+
+        @Override
+        public FavoriteHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
+            View view = layoutInflater
+                    .inflate(R.layout.words_list_item, parent, false);
+            return new FavoriteHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(FavoriteHolder holder, int position) {
+            ListItem item = mListFavorite.get(position);
+            holder.bindHistory(item);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mListFavorite.size();
         }
     }
 }

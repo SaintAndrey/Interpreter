@@ -27,10 +27,10 @@ public class WordsListQuery {
 
     }
 
-    public ListItem getWord(String text) {
+    public ListItem getWord(String text, String langs) {
         WordCursorWrapper cursor = queryWords(
-                TranslatorTable.Cols.NATIVE + " = ?",
-                new String[] { text }
+                TranslatorTable.Cols.NATIVE + " = ? AND " + TranslatorTable.Cols.LANGS + " = ?",
+                new String[] { text , langs}
         );
 
         try {
@@ -49,8 +49,8 @@ public class WordsListQuery {
         mItemsWord = new ArrayList<>();
 
         WordCursorWrapper cursor = queryWords(
-                TranslatorTable.Cols.FAVORITE + " = ?",
-                new String[] { Integer.toString(10) });
+                whereClause,
+                new String[] { "Yes" });
 
         try {
             cursor.moveToFirst();
@@ -106,10 +106,10 @@ public class WordsListQuery {
         Log.d("db", "Put: " + word.getForeignText());
         values.put(TranslatorTable.Cols.LANGS, word.getLangs());
         Log.d("db", "Put: " + word.getLangs());
-        values.put(TranslatorTable.Cols.HISTORY, (word.isHistory() ? 1 : 0));
-        Log.d("db", "Put: " + (word.isHistory() ? 1 : 0));
-        values.put(TranslatorTable.Cols.FAVORITE, (word.isFavorite() ? 1 : 0));
-        Log.d("db", "Put: " + (word.isFavorite() ? 1 : 0));
+        values.put(TranslatorTable.Cols.HISTORY, (word.isHistory() ? "Yes" : "No"));
+        Log.d("db", "Put: " + (word.isHistory() ? "Yes" : "No"));
+        values.put(TranslatorTable.Cols.FAVORITE, (word.isFavorite() ? "Yes" : "No"));
+        Log.d("db", "Put: " + (word.isFavorite() ? "Yes" : "No"));
         values.put(TranslatorTable.Cols.JSON_FILE, word.getJSONFile());
         Log.d("db", "Put: " + word.getJSONFile());
 
