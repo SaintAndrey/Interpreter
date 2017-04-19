@@ -5,4 +5,5 @@
     <string name="foreign_lang">Английский</string>
     <string name="history">История</string>
     <string name="favorite">Избранное</string>
+    <string name="delete_menu">Удалить</string>
 </resources>

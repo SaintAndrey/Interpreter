@@ -130,13 +130,17 @@
         android:layout_height="wrap_content"
         android:layout_weight="1">
 
-        <Button
+        <ImageButton
+            android:src="@drawable/ic_transltor"
+            android:background="@color/backgroundImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"/>
 
-        <Button
+        <ImageButton
             android:id="@+id/words_list"
+            android:background="@color/backgroundImageButton"
+            android:src="@drawable/ic_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"/>

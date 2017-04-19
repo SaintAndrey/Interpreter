@@ -4,13 +4,19 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.TabHost;
 import android.widget.TextView;
 
@@ -18,7 +24,7 @@ import java.util.List;
 
 public class WordsListActivity extends AppCompatActivity {
 
-    private Button mTranslatorActivity;
+    private ImageButton mTranslatorActivity;
     private RecyclerView mRecyclerViewHistory;
     private RecyclerView mRecyclerViewFavorite;
     private HistoryAdapter mAdapterHistory;
@@ -29,7 +35,7 @@ public class WordsListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_words_list);
 
-        mTranslatorActivity = (Button) findViewById(R.id.translate_activity);
+        mTranslatorActivity = (ImageButton) findViewById(R.id.translate_activity);
 
         TabHost tabHost = (TabHost) findViewById(R.id.tabHost);
         tabHost.setup();
@@ -47,6 +53,13 @@ public class WordsListActivity extends AppCompatActivity {
         tabHost.addTab(tabSpec);
 
         tabHost.setCurrentTabByTag("History");
+
+        tabHost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateUI();
+            }
+        });
 
         mRecyclerViewHistory = (RecyclerView) findViewById(R.id.recyclerTab1);
         mRecyclerViewHistory.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -77,7 +90,8 @@ public class WordsListActivity extends AppCompatActivity {
         mRecyclerViewFavorite.setAdapter(mAdapterFavorite);
     }
 
-    private class HistoryHolder extends RecyclerView.ViewHolder {
+    private class HistoryHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
         private ListItem mItem;
 
         private TextView mTextNative;
@@ -91,6 +105,8 @@ public class WordsListActivity extends AppCompatActivity {
             mTextForeign = (TextView) itemView.findViewById(R.id.foreign_text_in_words_list);
             mCheckBoxFavorite = (CheckBox) itemView.findViewById(R.id.checkBox_in_words_list);
             mLangs = (TextView) itemView.findViewById(R.id.langs_in_words_list);
+
+            mCheckBoxFavorite.setOnClickListener(this);
         }
 
         public void bindHistory(ListItem item) {
@@ -100,6 +116,36 @@ public class WordsListActivity extends AppCompatActivity {
             mCheckBoxFavorite.setChecked(mItem.isFavorite());
             mLangs.setText(mItem.getLangs());
         }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                if (v.getId() == R.id.checkBox_in_words_list) {
+                    mItem.setFavorite(mCheckBoxFavorite.isChecked());
+                    new WordsListQuery(getApplicationContext()).updateItemWord(mItem);
+                }
+                updateUI();
+            }
+        }
+
+    }
+
+    private void showPopupMenu(View v, final String text) {
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.inflate(R.menu.popup_delete_menu);
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                new WordsListQuery(getApplicationContext())
+                        .deleteItemWord(text);
+                updateUI();
+                return true;
+            }
+        });
+
+        popupMenu.show();
     }
 
     private class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
@@ -115,6 +161,14 @@ public class WordsListActivity extends AppCompatActivity {
             LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
             View view = layoutInflater
                     .inflate(R.layout.words_list_item, parent, false);
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    int pos = mRecyclerViewHistory.getChildLayoutPosition(v);
+                    showPopupMenu(v, mListHistory.get(pos).getNativeText());
+                    return true;
+                }
+            });
             return new HistoryHolder(view);
         }
 
@@ -128,10 +182,11 @@ public class WordsListActivity extends AppCompatActivity {
         public int getItemCount() {
             return mListHistory.size();
         }
+
     }
 
 
-    private class FavoriteHolder extends RecyclerView.ViewHolder {
+    private class FavoriteHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private ListItem mItem;
 
         private TextView mTextNative;
@@ -153,6 +208,20 @@ public class WordsListActivity extends AppCompatActivity {
             mTextForeign.setText(mItem.getForeignText());
             mCheckBoxFavorite.setChecked(mItem.isFavorite());
             mLangs.setText(mItem.getLangs());
+
+            mCheckBoxFavorite.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                if (v.getId() == R.id.checkBox_in_words_list) {
+                    mItem.setFavorite(mCheckBoxFavorite.isChecked());
+                    new WordsListQuery(getApplicationContext()).updateItemWord(mItem);
+                }
+                updateUI();
+            }
         }
     }
 

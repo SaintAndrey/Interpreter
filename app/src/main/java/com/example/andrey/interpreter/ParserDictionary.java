@@ -29,13 +29,11 @@ public class ParserDictionary implements Parser<List<Dictionary>>{
                     Dictionary dictionary = new Dictionary();
                     JSONObject result = arrayTr.getJSONObject(i);
                     dictionary.addTranslatedText(result.getString("text"));
-                    Log.d("dict", "Text: " + result.getString("text"));
                     try {
                         JSONArray syn = result.getJSONArray("syn");
                         for (int j = 0; j < syn.length(); j++) {
                             JSONObject resSyn = syn.getJSONObject(j);
                             dictionary.addTranslatedText(resSyn.getString("text"));
-                            Log.d("dict", "Text: " + resSyn.getString("text"));
                         }
                     } catch (JSONException e) {
                     }
@@ -45,7 +43,6 @@ public class ParserDictionary implements Parser<List<Dictionary>>{
                         for (int j = 0; j < mean.length(); j++) {
                             JSONObject resMean = mean.getJSONObject(j);
                             dictionary.addMeanText(resMean.getString("text"));
-                            Log.d("dict", "Mean: " + resMean.getString("text"));
                         }
                     } catch (JSONException e) {
                     }
@@ -60,7 +57,6 @@ public class ParserDictionary implements Parser<List<Dictionary>>{
                                 JSONObject exTrString = exTr.getJSONObject(k);
                                 dictionary
                                         .addExamples(exampleKey, exTrString.getString("text"));
-                                Log.d("dict", "Examples: " + exampleKey + "-" + exTrString.getString("text"));
                             }
                         }
                     } catch (JSONException e) {

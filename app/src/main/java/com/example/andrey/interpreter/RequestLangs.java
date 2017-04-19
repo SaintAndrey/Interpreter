@@ -39,8 +39,6 @@ public class RequestLangs extends AsyncTask<Void, Void, Map<String, String>> {
                     Iterator<String> iteratorLangs = resLangs.keys();
                     while (iteratorLangs.hasNext()) {
                         String key = iteratorLangs.next();
-                        Log.d("langs", "Key: " + resLangs.getString(key));
-                        Log.d("langs", "Value: " + key);
                         mapLangs.put(resLangs.getString(key), key);
                     }
 

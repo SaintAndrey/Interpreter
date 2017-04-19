@@ -9,4 +9,5 @@
     <color name="colorMeanText">#80494B</color>
     <color name="colorExamples">#777777</color>
     <color name="colorSwapLangs">#f2cc3d</color>
+    <color name="backgroundImageButton">#ffffff</color>
 </resources>

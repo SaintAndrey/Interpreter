@@ -43,7 +43,6 @@ public class RequestDictionary extends AsyncTask<String, Void, List<Dictionary>>
 
         // Получение JSON файла
         JSON = Connect.getFile(requestURL);
-        Log.d("json", JSON);
 
         // Парсинг файла и заполнение результата в тип List<Dictionary>
         Parser<List<Dictionary>> parser = new ParserDictionary();

@@ -19,7 +19,6 @@ public class Connect {
     public static String getFile(String requestURL) {
 
         try {
-            Log.d("url", requestURL);
             URL url = new URL(requestURL);
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.connect();
@@ -35,7 +34,6 @@ public class Connect {
                 while ((line = bufferedReader.readLine()) != null) {
                     resultFile.append(line + '\n');
                 }
-                Log.d("json", resultFile.toString());
                 return resultFile.toString();
             }
 

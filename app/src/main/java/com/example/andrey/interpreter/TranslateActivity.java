@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -36,12 +40,11 @@ public class TranslateActivity extends AppCompatActivity {
     private Button mButtonTranslate;
     private RecyclerView mDictionaryRecyclerView;
     private DictionaryAdapter mAdapter;
-    private Button mWordsList;
+    private ImageButton mWordsList;
     private CheckBox mFavoriteCheckBox;
 
     private Map<String, String> mTranslatorMap;
     private List<String> mSortedLands;
-    private ListItem mWordItem = new ListItem();
     private String JSON;
 
     @Override
@@ -58,7 +61,7 @@ public class TranslateActivity extends AppCompatActivity {
         mTranslatedText.setMovementMethod(new ScrollingMovementMethod());
         mInputText = (EditText) findViewById(R.id.translate_field);
         mButtonTranslate = (Button) findViewById(R.id.button_translate);
-        mWordsList = (Button) findViewById(R.id.words_list);
+        mWordsList = (ImageButton) findViewById(R.id.words_list);
         mFavoriteCheckBox = (CheckBox) findViewById(R.id.checkBox);
 
         mDictionaryRecyclerView = (RecyclerView) findViewById(R.id.translator_recycler_view);
@@ -69,12 +72,10 @@ public class TranslateActivity extends AppCompatActivity {
         mButtonTranslate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WordsListQuery query = new WordsListQuery(getApplicationContext());
-                ListItem item = query.getWord(mInputText.getText().toString(), doStringLangs());
-                if (item == null) {
+                if (searchInDb() == null) {
                     doRequest();
                 } else {
-                    Log.d("debug", "query: " + item.getNativeText());
+                    ListItem item = searchInDb();
                     mTranslatedText.setText(item.getForeignText());
                     mFavoriteCheckBox.setChecked(item.isFavorite());
                     updateList(new ParserDictionary().doParse(item.getJSONFile()));
@@ -106,11 +107,37 @@ public class TranslateActivity extends AppCompatActivity {
         mWordsList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createWordItem();
-                WordsListQuery query = new WordsListQuery(getApplicationContext());
-                query.addItemWord(mWordItem);
+                searchInDb();
+                if (mInputText.getText().toString().isEmpty()) {
+                    Intent intent = new Intent(TranslateActivity.this, WordsListActivity.class);
+                    startActivity(intent);
+                    return;
+                }
+
+                if (searchInDb() == null) {
+                    new WordsListQuery(getApplicationContext()).addItemWord(createWordItem());
+                } else {
+                    new WordsListQuery(getApplicationContext()).updateItemWord(createWordItem());
+                }
                 Intent intent = new Intent(TranslateActivity.this, WordsListActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        mInputText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mFavoriteCheckBox.setChecked(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
 
@@ -124,6 +151,21 @@ public class TranslateActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mInputText.getText().toString().isEmpty()) {
+            return;
+        }
+
+        if (searchInDb() == null) {
+            new WordsListQuery(getApplicationContext()).addItemWord(createWordItem());
+        } else {
+            new WordsListQuery(getApplicationContext()).updateItemWord(createWordItem());
+        }
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(KEY_NATIVE_LANG, mNativeLang.getText().toString());
@@ -131,15 +173,24 @@ public class TranslateActivity extends AppCompatActivity {
         outState.putString(KEY_TEXT, mInputText.getText().toString());
     }
 
-    private void createWordItem() {
+    private ListItem searchInDb() {
+        WordsListQuery query = new WordsListQuery(getApplicationContext());
+        ListItem item = query.getWord(mInputText.getText().toString(), doStringLangs());
+        if (item != null) {
+            return item;
+        }
+        return null;
+    }
+
+    private ListItem createWordItem() {
+        ListItem mWordItem = new ListItem();
         mWordItem.setNativeText(mInputText.getText().toString());
         mWordItem.setForeignText(mTranslatedText.getText().toString());
         mWordItem.setHistory(true);
-        mWordItem.setLangs(mTranslatorMap.get(mNativeLang.getText().toString())
-                + "-"
-                + mTranslatorMap.get(mForeignLang.getText().toString()));
+        mWordItem.setLangs(doStringLangs());
         mWordItem.setFavorite(mFavoriteCheckBox.isChecked());
         mWordItem.setJSONFile(JSON);
+        return mWordItem;
     }
 
     // Отправка запроса на получения перевода и синонимов
@@ -150,9 +201,9 @@ public class TranslateActivity extends AppCompatActivity {
                 RequestTranslator rt = new RequestTranslator();
                 RequestDictionary rd = new RequestDictionary();
                 rt.execute(doStringLangs(), mInputText.getText().toString());
-                rd.execute(doStringLangs(), mInputText.getText().toString());
-
                 mTranslatedText.setText(rt.get());
+
+                rd.execute(doStringLangs(), mInputText.getText().toString());
                 updateList(rd.get());
 
                 JSON = rd.getJSON();
@@ -254,14 +305,20 @@ public class TranslateActivity extends AppCompatActivity {
 
             mTitleText.setText(fillString(d.getTranslatedText()));
 
-            mTitleMean.setText("(" + fillString(d.getMeansText()) + ")");
+            if (!d.getMeansText().isEmpty()) {
+                mTitleMean.setText("(" + fillString(d.getMeansText()) + ")");
+            } else {
+                mTitleMean.setVisibility(View.GONE);
+            }
 
             StringBuilder exampleMap = new StringBuilder();
             for (Map.Entry entries :
                     d.getExamples().entrySet()) {
                 exampleMap.append(entries.getKey() + " - " + entries.getValue() + "\n");
             }
-            mTitleExamples.setText(exampleMap.toString());
+            if (exampleMap.length() != 0) {
+                mTitleExamples.setText(exampleMap.toString());
+            }
         }
 
     }
@@ -290,7 +347,6 @@ public class TranslateActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            Log.d("adapter", Integer.toString(mDict.size()));
             return mDict.size();
         }
     }

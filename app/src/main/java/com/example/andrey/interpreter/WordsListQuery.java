@@ -64,24 +64,7 @@ public class WordsListQuery {
 
         return mItemsWord;
     }
-
-    public List<ListItem> getWords() {
-        mItemsWord = new ArrayList<>();
-
-        WordCursorWrapper cursor = queryWords(null, null);
-
-        try {
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                mItemsWord.add(cursor.getWord());
-                cursor.moveToNext();
-            }
-        } finally {
-            cursor.close();
-        }
-
-        return mItemsWord;
-    }
+    
 
     public void addItemWord(ListItem word) {
         ContentValues values = getContentvalues(word);
@@ -89,29 +72,31 @@ public class WordsListQuery {
         mDatabase.insert(TranslatorTable.NAME, null, values);
     }
 
-    public void updateList(ListItem word) {
+    public void updateItemWord(ListItem word) {
         String text = word.getNativeText();
+        String langs = word.getLangs();
         ContentValues values = getContentvalues(word);
 
         mDatabase.update(TranslatorTable.NAME, values,
-                TranslatorTable.Cols.NATIVE + " = ?",
-                new String[] { text });
+                TranslatorTable.Cols.NATIVE + " = ? AND " + TranslatorTable.Cols.LANGS + " = ?",
+                new String[] { text , langs}
+        );
+    }
+
+    public void deleteItemWord(String text) {
+        mDatabase.delete(TranslatorTable.NAME,
+                TranslatorTable.Cols.NATIVE + " = '" + text + "'",
+                null);
     }
 
     private static ContentValues getContentvalues(ListItem word) {
         ContentValues values = new ContentValues();
         values.put(TranslatorTable.Cols.NATIVE, word.getNativeText());
-        Log.d("db", "Put: " + word.getNativeText());
         values.put(TranslatorTable.Cols.FOREIGN, word.getForeignText());
-        Log.d("db", "Put: " + word.getForeignText());
         values.put(TranslatorTable.Cols.LANGS, word.getLangs());
-        Log.d("db", "Put: " + word.getLangs());
         values.put(TranslatorTable.Cols.HISTORY, (word.isHistory() ? "Yes" : "No"));
-        Log.d("db", "Put: " + (word.isHistory() ? "Yes" : "No"));
         values.put(TranslatorTable.Cols.FAVORITE, (word.isFavorite() ? "Yes" : "No"));
-        Log.d("db", "Put: " + (word.isFavorite() ? "Yes" : "No"));
         values.put(TranslatorTable.Cols.JSON_FILE, word.getJSONFile());
-        Log.d("db", "Put: " + word.getJSONFile());
 
         return values;
     }
