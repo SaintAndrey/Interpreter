@@ -46,11 +46,14 @@ public class TranslateActivity extends AppCompatActivity {
     private Map<String, String> mTranslatorMap;
     private List<String> mSortedLands;
     private String JSON;
+    private Cache mCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_translate);
+
+        mCache = new Cache();
 
         mNativeLang = (TextView) findViewById(R.id.native_lang);
         mNativeLang.setText("Английский");
@@ -72,13 +75,29 @@ public class TranslateActivity extends AppCompatActivity {
         mButtonTranslate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (searchInDb() == null) {
-                    doRequest();
-                } else {
+                if (searchInDb() != null) {
                     ListItem item = searchInDb();
                     mTranslatedText.setText(item.getForeignText());
                     mFavoriteCheckBox.setChecked(item.isFavorite());
                     updateList(new ParserDictionary().doParse(item.getJSONFile()));
+                    Log.d("cache", "Db");
+                } else {
+                    if (mCache.searchInCache(mInputText.getText().toString(), doStringLangs())) {
+                        Cache.ItemCache item = mCache
+                                .getItemCache(mInputText.getText().toString(), doStringLangs());
+                        mTranslatedText.setText(item.getForeignText());
+                        updateList(item.getDictionaries());
+                        Log.d("cache", "Cache");
+                    } else {
+                        doRequest();
+                        mCache.addInCashe(
+                                mInputText.getText().toString(),
+                                mTranslatedText.getText().toString(),
+                                doStringLangs(),
+                                new ParserDictionary().doParse(JSON)
+                        );
+                        Log.d("cache", "Internet");
+                    }
                 }
             }
         });
@@ -148,21 +167,6 @@ public class TranslateActivity extends AppCompatActivity {
             doRequest();
         }
 
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (mInputText.getText().toString().isEmpty()) {
-            return;
-        }
-
-        if (searchInDb() == null) {
-            new WordsListQuery(getApplicationContext()).addItemWord(createWordItem());
-        } else {
-            new WordsListQuery(getApplicationContext()).updateItemWord(createWordItem());
-        }
     }
 
     @Override
@@ -367,7 +371,6 @@ public class TranslateActivity extends AppCompatActivity {
     }
 
     public void updateList(List<Dictionary> dictionaries) {
-        Log.d("adapter", dictionaries.toString());
         mAdapter = new DictionaryAdapter(dictionaries);
         mDictionaryRecyclerView.setAdapter(mAdapter);
     }
