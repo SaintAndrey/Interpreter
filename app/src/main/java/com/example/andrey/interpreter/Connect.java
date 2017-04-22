@@ -1,7 +1,5 @@
 package com.example.andrey.interpreter;
 
-import android.util.Log;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

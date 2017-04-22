@@ -1,7 +1,5 @@
 package com.example.andrey.interpreter;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,16 +1,9 @@
 package com.example.andrey.interpreter;
 
 import android.os.AsyncTask;
-import android.util.Log;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
