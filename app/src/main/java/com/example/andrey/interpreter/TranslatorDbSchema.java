@@ -1,7 +1,7 @@
 package com.example.andrey.interpreter;
 
 /**
- * Created by Andrey on 17/04/2017.
+ * Структура БД
  */
 
 public class TranslatorDbSchema {

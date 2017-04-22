@@ -6,12 +6,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.Layout;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -37,10 +41,8 @@ public class TranslateActivity extends AppCompatActivity {
     private TextView mSwapLangs;
     private TextView mTranslatedText;
     private EditText mInputText;
-    private Button mButtonTranslate;
     private RecyclerView mDictionaryRecyclerView;
     private DictionaryAdapter mAdapter;
-    private ImageButton mWordsList;
     private CheckBox mFavoriteCheckBox;
 
     private Map<String, String> mTranslatorMap;
@@ -63,8 +65,6 @@ public class TranslateActivity extends AppCompatActivity {
         mTranslatedText = (TextView) findViewById(R.id.translated_word);
         mTranslatedText.setMovementMethod(new ScrollingMovementMethod());
         mInputText = (EditText) findViewById(R.id.translate_field);
-        mButtonTranslate = (Button) findViewById(R.id.button_translate);
-        mWordsList = (ImageButton) findViewById(R.id.words_list);
         mFavoriteCheckBox = (CheckBox) findViewById(R.id.checkBox);
 
         mDictionaryRecyclerView = (RecyclerView) findViewById(R.id.translator_recycler_view);
@@ -72,47 +72,24 @@ public class TranslateActivity extends AppCompatActivity {
 
         getLangs();
 
-        mButtonTranslate.setOnClickListener(new View.OnClickListener() {
+        mFavoriteCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (searchInDb() != null) {
-                    ListItem item = searchInDb();
-                    mTranslatedText.setText(item.getForeignText());
-                    mFavoriteCheckBox.setChecked(item.isFavorite());
-                    updateList(new ParserDictionary().doParse(item.getJSONFile()));
-                    Log.d("cache", "Db");
-                } else {
-                    if (mCache.searchInCache(mInputText.getText().toString(), doStringLangs())) {
-                        Cache.ItemCache item = mCache
-                                .getItemCache(mInputText.getText().toString(), doStringLangs());
-                        mTranslatedText.setText(item.getForeignText());
-                        updateList(item.getDictionaries());
-                        Log.d("cache", "Cache");
-                    } else {
-                        doRequest();
-                        mCache.addInCashe(
-                                mInputText.getText().toString(),
-                                mTranslatedText.getText().toString(),
-                                doStringLangs(),
-                                new ParserDictionary().doParse(JSON)
-                        );
-                        Log.d("cache", "Internet");
-                    }
-                }
+                addInDb();
             }
         });
 
         mNativeLang.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showPopupMenu(v);
+                showPopupMenu(v, mForeignLang.getText().toString());
             }
         });
 
         mForeignLang.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showPopupMenu(v);
+                showPopupMenu(v, mNativeLang.getText().toString());
             }
         });
 
@@ -120,26 +97,6 @@ public class TranslateActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 swapLangs();
-            }
-        });
-
-        mWordsList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchInDb();
-                if (mInputText.getText().toString().isEmpty()) {
-                    Intent intent = new Intent(TranslateActivity.this, WordsListActivity.class);
-                    startActivity(intent);
-                    return;
-                }
-
-                if (searchInDb() == null) {
-                    new WordsListQuery(getApplicationContext()).addItemWord(createWordItem());
-                } else {
-                    new WordsListQuery(getApplicationContext()).updateItemWord(createWordItem());
-                }
-                Intent intent = new Intent(TranslateActivity.this, WordsListActivity.class);
-                startActivity(intent);
             }
         });
 
@@ -152,11 +109,19 @@ public class TranslateActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mFavoriteCheckBox.setChecked(false);
+                if (mInputText.getText().toString().isEmpty()) {
+                    mFavoriteCheckBox.setVisibility(View.GONE);
+                    mTranslatedText.setText("");
+                    mDictionaryRecyclerView.setVisibility(View.GONE);
+                } else {
+                    mFavoriteCheckBox.setVisibility(View.VISIBLE);
+                    mDictionaryRecyclerView.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                getChange();
             }
         });
 
@@ -164,7 +129,7 @@ public class TranslateActivity extends AppCompatActivity {
             mNativeLang.setText(savedInstanceState.getString(KEY_NATIVE_LANG));
             mForeignLang.setText(savedInstanceState.getString(KEY_FOREIGN_LANG));
             mInputText.setText(savedInstanceState.getString(KEY_TEXT));
-            doRequest();
+            getChange();
         }
 
     }
@@ -177,6 +142,31 @@ public class TranslateActivity extends AppCompatActivity {
         outState.putString(KEY_TEXT, mInputText.getText().toString());
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        // Если поле для ввода пустое, то сразу переходим в другую активность
+        if (mInputText.getText().toString().isEmpty()) {
+            Intent intent = new Intent(TranslateActivity.this, WordsListActivity.class);
+            startActivity(intent);
+            return super.onOptionsItemSelected(item);
+        }
+
+        // Если нет, то добавляем/обновляем запись, и переходим в активность
+        addInDb();
+        Intent intent = new Intent(TranslateActivity.this, WordsListActivity.class);
+        startActivity(intent);
+        return super.onOptionsItemSelected(item);
+    }
+
+    // Поиск по БД
+    // Если находим нужный элемент, то возвращаем его
     private ListItem searchInDb() {
         WordsListQuery query = new WordsListQuery(getApplicationContext());
         ListItem item = query.getWord(mInputText.getText().toString(), doStringLangs());
@@ -186,6 +176,47 @@ public class TranslateActivity extends AppCompatActivity {
         return null;
     }
 
+    // Назначение слушателя на ChechBox
+    // Если данная запись не существует в БД, то добавляет ее
+    // Если существует, то обновляет эту запись, с изменением поля favorite
+    private void addInDb() {
+        if (searchInDb() == null) {
+            new WordsListQuery(getApplicationContext()).addItemWord(createWordItem());
+        } else {
+            new WordsListQuery(getApplicationContext()).updateItemWord(createWordItem());
+        }
+    }
+
+    // Изменить результаты
+    private void getChange() {
+        if (searchInDb() != null) {
+            // Поиск по БД
+            ListItem item = searchInDb();
+            mTranslatedText.setText(item.getForeignText());
+            mFavoriteCheckBox.setChecked(item.isFavorite());
+            updateList(new ParserDictionary().doParse(item.getJSONFile()));
+            Log.d("cache", "Db");
+        } else if(mCache.searchInCache(mInputText.getText().toString(), doStringLangs())) {
+            // Поиск по кэшу
+            Cache.ItemCache item = mCache
+                    .getItemCache(mInputText.getText().toString(), doStringLangs());
+            mTranslatedText.setText(item.getForeignText());
+            updateList(item.getDictionaries());
+            Log.d("cache", "Cache");
+        } else {
+            // Запрос в интернет
+            doRequest();
+            mCache.addInCashe(
+                    mInputText.getText().toString(),
+                    mTranslatedText.getText().toString(),
+                    doStringLangs(),
+                    new ParserDictionary().doParse(JSON)
+            );
+            Log.d("cache", "Internet");
+        }
+    }
+
+    // Формирование элемента ListItem
     private ListItem createWordItem() {
         ListItem mWordItem = new ListItem();
         mWordItem.setNativeText(mInputText.getText().toString());
@@ -201,7 +232,6 @@ public class TranslateActivity extends AppCompatActivity {
     private void doRequest() {
         if (!mInputText.getText().toString().isEmpty()) {
             try {
-
                 RequestTranslator rt = new RequestTranslator();
                 RequestDictionary rd = new RequestDictionary();
                 rt.execute(doStringLangs(), mInputText.getText().toString());
@@ -214,11 +244,10 @@ public class TranslateActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
             } catch (ExecutionException e) {
             }
-        } else {
-            mTranslatedText.setText("");
         }
     }
 
+    // Возращаем валидную строку пару значений языков
     private String doStringLangs() {
         return mTranslatorMap.get(mNativeLang.getText().toString())
                 + "-"
@@ -226,7 +255,7 @@ public class TranslateActivity extends AppCompatActivity {
     }
 
     // Отобразить PopupMenu с выбором поддерживаемых языков
-    private void showPopupMenu(View v) {
+    private void showPopupMenu(View v, final String anotherLang) {
         PopupMenu popupMenu = new PopupMenu(this, v);
         popupMenu.inflate(R.menu.popup_menu);
 
@@ -240,7 +269,13 @@ public class TranslateActivity extends AppCompatActivity {
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                textView.setText(item.getTitle());
+                // Если языки совпадают, то вместо замены мы меняем языки местами
+                if (item.getTitle().equals(anotherLang)) {
+                    swapLangs();
+                } else {
+                    textView.setText(item.getTitle());
+                    getChange();
+                }
                 return true;
             }
         });
@@ -286,7 +321,7 @@ public class TranslateActivity extends AppCompatActivity {
             mTranslatedText.setText(tmp);
         }
 
-        doRequest();
+        getChange();
     }
 
     private class DictionaryHolder extends RecyclerView.ViewHolder {

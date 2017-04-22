@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">Interpreter</string>
-    <string name="action_settings">Settings</string>
     <string name="native_lang">Русский</string>
     <string name="foreign_lang">Английский</string>
     <string name="history">История</string>
     <string name="favorite">Избранное</string>
     <string name="delete_menu">Удалить</string>
+    <string name="bookmarks">Закладки</string>
+    <string name="delete_menu_all">Удалить всё</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>

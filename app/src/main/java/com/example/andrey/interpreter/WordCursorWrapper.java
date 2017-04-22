@@ -6,7 +6,7 @@ import android.database.CursorWrapper;
 import com.example.andrey.interpreter.TranslatorDbSchema.TranslatorTable;
 
 /**
- * Created by Andrey on 18/04/2017.
+ * Курсор для БД
  */
 
 public class WordCursorWrapper extends CursorWrapper {

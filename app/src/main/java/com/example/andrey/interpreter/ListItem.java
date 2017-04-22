@@ -1,7 +1,13 @@
 package com.example.andrey.interpreter;
 
 /**
- * Created by Andrey on 17/04/2017.
+ * Структура хранения записей для хранения в БД
+ * mNativeText - введенное слово
+ * mForeignText - перевод
+ * mLangs - пара языков
+ * mJSONFile - строка типа json
+ * mHistory - находится ли запись в Истории
+ * mFavorite - находится ли запись в Избранном
  */
 
 public class ListItem {

@@ -9,17 +9,17 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Created by Andrey on 20/04/2017.
+ * Структура для временного хранения 128-и записей
  */
 
 public class Cache {
     private List<ItemCache> mCaches;
-    private ItemCache mItemCache;
 
     Cache() {
         mCaches = new ArrayList<>();
     }
 
+    // Добавление записи
     public void addInCashe(String nativeText, String foreignText,
                           String langs, List<Dictionary> dictionaries) {
 
@@ -30,6 +30,7 @@ public class Cache {
         mCaches.add(new ItemCache(nativeText, foreignText, langs, dictionaries));
     }
 
+    // Если в массиве есть такой элемент, то возвращает его
     public ItemCache getItemCache(String nativeText, String langs) {
         for (ItemCache line :
                 mCaches) {
@@ -40,10 +41,10 @@ public class Cache {
         return null;
     }
 
+    // Возвращает true - если в массиве есть подходящий элемент
     public boolean searchInCache(String nativeText, String langs) {
         for (ItemCache line :
                 mCaches) {
-            Log.d("cache", nativeText + " " + langs + " - " + line.toString());
             if ((nativeText + " " + langs).equals(line.toString())) {
                 return true;
             }
@@ -51,16 +52,20 @@ public class Cache {
         return false;
     }
 
+    // Очищает первые 64 записи в кэше
+    // Остальные 64 записи копирует в новый кэш
     private void deleteCache() {
-        mCaches = mCaches.subList(0, 63);
+        mCaches = mCaches.subList(64, 127);
     }
 
+    // Внутренний класс для хранении одной записи
     public class ItemCache {
-        private String mNativeText;
-        private String mForeignText;
-        private String mLangs;
-        private List<Dictionary> mDictionaries;
+        private String mNativeText; // Строка, которую вводит пользователь
+        private String mForeignText; // Перевод введенной строки
+        private String mLangs; // Строка с парой кодов языков
+        private List<Dictionary> mDictionaries; // Массив записей запроса с Яндекс.Словарь
 
+        // Инициализация записи
         ItemCache(String nativeText, String foreignText,
                   String langs, List<Dictionary> dictionaries) {
             mNativeText = nativeText;
@@ -74,7 +79,6 @@ public class Cache {
         }
 
         public String getForeignText() {
-
             return mForeignText;
         }
 

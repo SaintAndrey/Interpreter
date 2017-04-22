@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.example.andrey.interpreter.TranslatorDbSchema.TranslatorTable;
 
 /**
- * Created by Andrey on 17/04/2017.
+ * Создание БД
  */
 
 public class TranslatorBaseHelper extends SQLiteOpenHelper {

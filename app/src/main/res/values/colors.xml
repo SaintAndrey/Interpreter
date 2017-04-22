@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
+    <color name="Primary">#f2cc3d</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="underTab">#000000</color>
-    <color name="colorAccent">#f2cc3d</color>
+    <color name="colorAccent">#000000</color>
     <color name="colorNum">#9A9A9A</color>
     <color name="colorTranslatedText">#4b4b99</color>
     <color name="colorMeanText">#80494B</color>

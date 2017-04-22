@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin">
+    android:paddingTop="@dimen/activity_horizontal_margin"
+    android:paddingBottom="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_vertical_margin"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true">
 
     <LinearLayout
         android:id="@+id/chooser_langs_layout"
@@ -25,8 +26,11 @@
                 android:id="@+id/native_lang"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="7dp"
+                android:textStyle="bold"
+                android:drawableRight="@drawable/ic_chooser_langs"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/swap_lang"/>
 
             <TextView
                 android:id="@+id/swap_lang"
@@ -40,6 +44,8 @@
                 android:id="@+id/foreign_lang"
                 android:layout_marginRight="7dp"
                 android:layout_marginTop="7dp"
+                android:textStyle="bold"
+                android:drawableRight="@drawable/ic_chooser_langs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"/>
@@ -60,18 +66,12 @@
         android:minHeight="100dp"
         android:maxHeight="100dp"/>
 
-    <Button
-        android:id="@+id/button_translate"
-        android:text="Перевести"
-        android:layout_below="@id/translate_field"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/translated_word"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/button_translate"
+        android:layout_below="@id/translate_field"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="7dp"
         android:layout_marginBottom="10dp"
@@ -83,40 +83,17 @@
         android:id="@+id/checkBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button_translate"
+        android:layout_below="@+id/translate_field"
         android:layout_alignParentRight="true"
         android:button="@drawable/checkbox_selector"
+        android:visibility="gone"
         android:layout_alignParentEnd="true"/>
-
-    <LinearLayout
-        android:id="@+id/buttons_layout"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageButton
-            android:src="@drawable/ic_transltor"
-            android:layout_width="wrap_content"
-            android:background="@color/backgroundImageButton"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-
-        <ImageButton
-            android:id="@+id/words_list"
-            android:src="@drawable/ic_list"
-            android:background="@color/backgroundImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-
-    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/translator_recycler_view"
         android:layout_below="@id/translated_word"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/buttons_layout"/>
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>

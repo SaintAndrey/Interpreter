@@ -22,9 +22,13 @@ import android.widget.TextView;
 
 import java.util.List;
 
+/**
+ * Вторая активность
+ * Содержит две таблицы с записями из БД - Историю и Избранное
+ */
+
 public class WordsListActivity extends AppCompatActivity {
 
-    private ImageButton mTranslatorActivity;
     private RecyclerView mRecyclerViewHistory;
     private RecyclerView mRecyclerViewFavorite;
     private HistoryAdapter mAdapterHistory;
@@ -34,8 +38,6 @@ public class WordsListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_words_list);
-
-        mTranslatorActivity = (ImageButton) findViewById(R.id.translate_activity);
 
         TabHost tabHost = (TabHost) findViewById(R.id.tabHost);
         tabHost.setup();
@@ -69,14 +71,9 @@ public class WordsListActivity extends AppCompatActivity {
 
         updateUI();
 
-        mTranslatorActivity.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
     }
 
+    // Обнавление обоих адаптеров
     private void updateUI() {
         WordsListQuery query = new WordsListQuery(getApplicationContext());
         List<ListItem> items = query
@@ -88,6 +85,53 @@ public class WordsListActivity extends AppCompatActivity {
                 .getWords(TranslatorDbSchema.TranslatorTable.Cols.FAVORITE + " = ?");
         mAdapterFavorite = new FavoriteAdapter(items);
         mRecyclerViewFavorite.setAdapter(mAdapterFavorite);
+    }
+
+
+    // Рopup меню
+    private void showPopupMenuHistory(View v,
+                                      final String text,
+                                      final String langs,
+                                      final boolean history) {
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.inflate(R.menu.popup_delete_menu);
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (history) {
+                    // Удаление из истории
+                    if (item.getItemId() == R.id.menu_delete_item) {
+                        // Удаление одной записи
+                        new WordsListQuery(getApplicationContext())
+                                .deleteItemWordFromHistory(text, langs);
+                        updateUI();
+                        return true;
+                    } else {
+                        // Удаление всех записей
+                        new WordsListQuery(getApplicationContext()).deleteAllHistory();
+                        updateUI();
+                        return true;
+                    }
+                } else {
+                    // Удаление из избранного
+                    if (item.getItemId() == R.id.menu_delete_item) {
+                        // Удаление одной записи
+                        new WordsListQuery(getApplicationContext())
+                                .deleteItemWordFromFavorite(text, langs);
+                        updateUI();
+                        return true;
+                    } else {
+                        // Удаление всех записей
+                        new WordsListQuery(getApplicationContext()).deleteAllFavorite();
+                        updateUI();
+                        return true;
+                    }
+                }
+            }
+        });
+
+        popupMenu.show();
     }
 
     private class HistoryHolder extends RecyclerView.ViewHolder
@@ -131,23 +175,6 @@ public class WordsListActivity extends AppCompatActivity {
 
     }
 
-    private void showPopupMenu(View v, final String text) {
-        PopupMenu popupMenu = new PopupMenu(this, v);
-        popupMenu.inflate(R.menu.popup_delete_menu);
-
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                new WordsListQuery(getApplicationContext())
-                        .deleteItemWord(text);
-                updateUI();
-                return true;
-            }
-        });
-
-        popupMenu.show();
-    }
-
     private class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
 
         private List<ListItem> mListHistory;
@@ -165,7 +192,10 @@ public class WordsListActivity extends AppCompatActivity {
                 @Override
                 public boolean onLongClick(View v) {
                     int pos = mRecyclerViewHistory.getChildLayoutPosition(v);
-                    showPopupMenu(v, mListHistory.get(pos).getNativeText());
+                    showPopupMenuHistory(v,
+                            mListHistory.get(pos).getNativeText(),
+                            mListHistory.get(pos).getLangs(),
+                            true);
                     return true;
                 }
             });
@@ -184,7 +214,6 @@ public class WordsListActivity extends AppCompatActivity {
         }
 
     }
-
 
     private class FavoriteHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private ListItem mItem;
@@ -238,6 +267,17 @@ public class WordsListActivity extends AppCompatActivity {
             LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
             View view = layoutInflater
                     .inflate(R.layout.words_list_item, parent, false);
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    int pos = mRecyclerViewHistory.getChildLayoutPosition(v);
+                    showPopupMenuHistory(v,
+                            mListFavorite.get(pos).getNativeText(),
+                            mListFavorite.get(pos).getLangs(),
+                            false);
+                    return true;
+                }
+            });
             return new FavoriteHolder(view);
         }
 
