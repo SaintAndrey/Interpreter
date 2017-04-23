@@ -59,6 +59,7 @@ public class TranslateActivity extends AppCompatActivity {
         mTranslatedText = (TextView) findViewById(R.id.translated_word);
         mTranslatedText.setMovementMethod(new ScrollingMovementMethod());
         mInputText = (EditText) findViewById(R.id.translate_field);
+        mInputText.setText("");
         mFavoriteCheckBox = (CheckBox) findViewById(R.id.checkBox);
 
         mDictionaryRecyclerView = (RecyclerView) findViewById(R.id.translator_recycler_view);

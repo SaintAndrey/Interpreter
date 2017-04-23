@@ -17,7 +17,7 @@ public class ParserDictionary implements Parser<List<Dictionary>>{
         List<Dictionary> dictionaries = new ArrayList<>();
         JSONObject data = null;
         try {
-            data = new JSONObject(file);
+            data = new JSONObject(file == null ? file : "");
             JSONArray text = data.getJSONArray("def");
             for (int n = 0; n < text.length(); n++) {
                 JSONObject res = text.getJSONObject(n);
