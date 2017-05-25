@@ -1,6 +1,8 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Internet;
 
 import android.os.AsyncTask;
+
+import com.example.andrey.interpreter.Parser.Parser;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,7 +17,8 @@ import org.json.JSONObject;
 
 public class RequestLangs extends AsyncTask<Void, Void, Map<String, String>> {
 
-    private final static String URL = "https://translate.yandex.net/api/v1.5/tr.json/getLangs?key=";
+    private final static String URL =
+            "https://translate.yandex.net/api/v1.5/tr.json/getLangs?key=";
     private final static String KEY =
             "trnsl.1.1.20170326T200601Z.c4375d143950de0a.1d980a245aff85e27afa1f73106b2800b4dad8c6";
 

@@ -1,4 +1,4 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Db;
 
 /**
  * Структура БД

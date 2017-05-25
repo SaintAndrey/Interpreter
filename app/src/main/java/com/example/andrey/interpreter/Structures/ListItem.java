@@ -1,4 +1,4 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Structures;
 
 /**
  * Структура хранения записей для хранения в БД

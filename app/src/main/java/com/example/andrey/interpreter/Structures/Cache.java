@@ -1,4 +1,4 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Structures;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
 public class Cache {
     private List<ItemCache> mCaches;
 
-    Cache() {
+    public Cache() {
         mCaches = new ArrayList<>();
     }
 

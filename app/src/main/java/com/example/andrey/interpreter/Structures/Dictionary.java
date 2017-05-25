@@ -1,4 +1,4 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Structures;
 
 import java.util.ArrayList;
 import java.util.HashMap;

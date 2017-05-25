@@ -1,11 +1,12 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Db;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.andrey.interpreter.TranslatorDbSchema.TranslatorTable;
+import com.example.andrey.interpreter.Structures.ListItem;
+import com.example.andrey.interpreter.Db.TranslatorDbSchema.TranslatorTable;
 
 import java.util.ArrayList;
 import java.util.List;

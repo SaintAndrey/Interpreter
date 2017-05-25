@@ -1,9 +1,10 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Db;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.example.andrey.interpreter.TranslatorDbSchema.TranslatorTable;
+import com.example.andrey.interpreter.Structures.ListItem;
+import com.example.andrey.interpreter.Db.TranslatorDbSchema.TranslatorTable;
 
 /**
  * Курсор для БД

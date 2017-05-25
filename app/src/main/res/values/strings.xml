@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Interpreter</string>
+    <string name="app_name">Translator</string>
     <string name="native_lang">Русский</string>
     <string name="foreign_lang">Английский</string>
     <string name="history">История</string>

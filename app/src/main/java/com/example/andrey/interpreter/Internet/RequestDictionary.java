@@ -1,6 +1,11 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Internet;
 
 import android.os.AsyncTask;
+import android.util.Log;
+
+import com.example.andrey.interpreter.Parser.Parser;
+import com.example.andrey.interpreter.Parser.ParserDictionary;
+import com.example.andrey.interpreter.Structures.Dictionary;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -36,6 +41,8 @@ public class RequestDictionary extends AsyncTask<String, Void, List<Dictionary>>
 
         // Получение JSON файла
         JSON = Connect.getFile(requestURL);
+
+        Log.d("JSON", JSON);
 
         // Парсинг файла и заполнение результата в тип List<Dictionary>
         Parser<List<Dictionary>> parser = new ParserDictionary();

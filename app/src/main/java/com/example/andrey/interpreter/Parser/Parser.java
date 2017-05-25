@@ -1,4 +1,4 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Parser;
 
 /**
  * Функциональный интерфейс, предназначенный парсить файл, подданный в параметр file

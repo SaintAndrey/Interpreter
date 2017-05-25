@@ -1,4 +1,9 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Parser;
+
+import android.util.Log;
+
+import com.example.andrey.interpreter.Parser.Parser;
+import com.example.andrey.interpreter.Structures.Dictionary;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,13 +16,13 @@ import java.util.List;
  * Отдельная реализация для парсинга запроса от сервера Яндекс.Словарь
  */
 
-public class ParserDictionary implements Parser<List<Dictionary>>{
+public class ParserDictionary implements Parser<List<Dictionary>> {
     @Override
     public List<Dictionary> doParse(String file) {
         List<Dictionary> dictionaries = new ArrayList<>();
         JSONObject data = null;
         try {
-            data = new JSONObject(file == null ? file : "");
+            data = new JSONObject(file != null ? file : "");
             JSONArray text = data.getJSONArray("def");
             for (int n = 0; n < text.length(); n++) {
                 JSONObject res = text.getJSONObject(n);
@@ -73,7 +78,6 @@ public class ParserDictionary implements Parser<List<Dictionary>>{
                     }
 
                     dictionaries.add(dictionary);
-
                 }
             }
         } catch (JSONException e) {

@@ -1,4 +1,4 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Internet;
 
 import java.io.BufferedReader;
 import java.io.IOException;

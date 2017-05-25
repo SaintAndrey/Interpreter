@@ -1,4 +1,4 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +12,11 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TabHost;
 import android.widget.TextView;
+
+import com.example.andrey.interpreter.Structures.ListItem;
+import com.example.andrey.interpreter.R;
+import com.example.andrey.interpreter.Db.TranslatorDbSchema;
+import com.example.andrey.interpreter.Db.WordsListQuery;
 
 import java.util.List;
 
@@ -82,10 +87,10 @@ public class WordsListActivity extends AppCompatActivity {
 
 
     // Рopup меню
-    private void showPopupMenuHistory(View v,
-                                      final String text,
-                                      final String langs,
-                                      final boolean history) {
+    private void showPopupMenu(View v,
+                               final String text,
+                               final String langs,
+                               final boolean history) {
         PopupMenu popupMenu = new PopupMenu(this, v);
         popupMenu.inflate(R.menu.popup_delete_menu);
 
@@ -185,7 +190,7 @@ public class WordsListActivity extends AppCompatActivity {
                 @Override
                 public boolean onLongClick(View v) {
                     int pos = mRecyclerViewHistory.getChildLayoutPosition(v);
-                    showPopupMenuHistory(v,
+                    showPopupMenu(v,
                             mListHistory.get(pos).getNativeText(),
                             mListHistory.get(pos).getLangs(),
                             true);
@@ -264,7 +269,7 @@ public class WordsListActivity extends AppCompatActivity {
                 @Override
                 public boolean onLongClick(View v) {
                     int pos = mRecyclerViewHistory.getChildLayoutPosition(v);
-                    showPopupMenuHistory(v,
+                    showPopupMenu(v,
                             mListFavorite.get(pos).getNativeText(),
                             mListFavorite.get(pos).getLangs(),
                             false);

@@ -1,10 +1,10 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Db;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.example.andrey.interpreter.TranslatorDbSchema.TranslatorTable;
+import com.example.andrey.interpreter.Db.TranslatorDbSchema.TranslatorTable;
 
 /**
  * Создание БД

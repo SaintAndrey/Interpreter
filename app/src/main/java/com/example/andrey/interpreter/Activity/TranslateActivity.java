@@ -1,6 +1,7 @@
-package com.example.andrey.interpreter;
+package com.example.andrey.interpreter.Activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -19,16 +19,31 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.andrey.interpreter.Structures.Cache;
+import com.example.andrey.interpreter.Structures.Dictionary;
+import com.example.andrey.interpreter.Structures.ListItem;
+import com.example.andrey.interpreter.Parser.ParserDictionary;
+import com.example.andrey.interpreter.R;
+import com.example.andrey.interpreter.Internet.RequestDictionary;
+import com.example.andrey.interpreter.Internet.RequestLangs;
+import com.example.andrey.interpreter.Internet.RequestTranslator;
+import com.example.andrey.interpreter.Db.WordsListQuery;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import ru.yandex.speechkit.Recognizer;
+import ru.yandex.speechkit.SpeechKit;
+import ru.yandex.speechkit.Vocalizer;
+
 public class TranslateActivity extends AppCompatActivity {
     private final static String KEY_NATIVE_LANG = "Native lang";
     private final static String KEY_FOREIGN_LANG = "Foreign lang";
     private final static String KEY_TEXT = "Text in EditText";
+    private final static String API_KEY_SPEECH_KIT = "54a33b90-69c6-4a33-8c5f-6e442387226b";
 
     private TextView mNativeLang;
     private TextView mForeignLang;
@@ -38,6 +53,7 @@ public class TranslateActivity extends AppCompatActivity {
     private RecyclerView mDictionaryRecyclerView;
     private DictionaryAdapter mAdapter;
     private CheckBox mFavoriteCheckBox;
+    private TextView mWiki;
 
     private Map<String, String> mTranslatorMap;
     private List<String> mSortedLands;
@@ -53,26 +69,50 @@ public class TranslateActivity extends AppCompatActivity {
 
         mNativeLang = (TextView) findViewById(R.id.native_lang);
         mNativeLang.setText("Английский");
+
         mForeignLang = (TextView) findViewById(R.id.foreign_lang);
         mForeignLang.setText("Русский");
+
         mSwapLangs = (TextView) findViewById(R.id.swap_lang);
+
         mTranslatedText = (TextView) findViewById(R.id.translated_word);
         mTranslatedText.setMovementMethod(new ScrollingMovementMethod());
+
         mInputText = (EditText) findViewById(R.id.translate_field);
         mInputText.setText("");
+
         mFavoriteCheckBox = (CheckBox) findViewById(R.id.checkBox);
-
-        mDictionaryRecyclerView = (RecyclerView) findViewById(R.id.translator_recycler_view);
-        mDictionaryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        getLangs();
-
         mFavoriteCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addInDb();
             }
         });
+
+        mWiki = (TextView) findViewById(R.id.speech_kit);
+        mWiki.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String uriString = mInputText
+                        .getText()
+                        .toString()
+                        .replace(" ", "_");
+                Intent browserIntent = new
+                        Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://"
+                                + mTranslatorMap.get(mNativeLang.getText().toString())
+                                + ".wikipedia.org/wiki/"
+                                + uriString));
+                startActivity(browserIntent);
+            }
+        });
+
+        mDictionaryRecyclerView = (RecyclerView) findViewById(R.id.translator_recycler_view);
+        mDictionaryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        getLangs();
+
+        SpeechKit.getInstance().configure(getApplicationContext(), API_KEY_SPEECH_KIT);
 
         mNativeLang.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,10 +146,12 @@ public class TranslateActivity extends AppCompatActivity {
                 mFavoriteCheckBox.setChecked(false);
                 if (mInputText.getText().toString().isEmpty()) {
                     mFavoriteCheckBox.setVisibility(View.GONE);
+                    mWiki.setVisibility(View.GONE);
                     mTranslatedText.setText("");
                     mDictionaryRecyclerView.setVisibility(View.GONE);
                 } else {
                     mFavoriteCheckBox.setVisibility(View.VISIBLE);
+                    mWiki.setVisibility(View.VISIBLE);
                     mDictionaryRecyclerView.setVisibility(View.VISIBLE);
                 }
             }
@@ -190,14 +232,13 @@ public class TranslateActivity extends AppCompatActivity {
             mTranslatedText.setText(item.getForeignText());
             mFavoriteCheckBox.setChecked(item.isFavorite());
             updateList(new ParserDictionary().doParse(item.getJSONFile()));
-            Log.d("cache", "Db");
         } else if(mCache.searchInCache(mInputText.getText().toString(), doStringLangs())) {
             // Поиск по кэшу
             Cache.ItemCache item = mCache
                     .getItemCache(mInputText.getText().toString(), doStringLangs());
             mTranslatedText.setText(item.getForeignText());
+            mFavoriteCheckBox.setChecked(false);
             updateList(item.getDictionaries());
-            Log.d("cache", "Cache");
         } else {
             // Запрос в интернет
             doRequest();
@@ -207,7 +248,7 @@ public class TranslateActivity extends AppCompatActivity {
                     doStringLangs(),
                     new ParserDictionary().doParse(JSON)
             );
-            Log.d("cache", "Internet");
+            mFavoriteCheckBox.setChecked(false);
         }
     }
 
